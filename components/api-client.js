@@ -281,7 +281,7 @@ export default React.createClass({
               list="paths"
               value={this.state.path}
               onChange={e => this.setState({path: e.target.value})}
-            />,
+            />
             <datalist id="paths">
               {
                 (
