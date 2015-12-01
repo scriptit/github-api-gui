@@ -3,12 +3,20 @@ import React, { Component, PropTypes } from 'react';
 import ObjectDescription from './object-description';
 import ObjectPreview from './object-preview';
 
+const DEFAULT_EXPANDED_TREE = {};
+
+function isExpandable(data){
+  return (typeof data === 'object' && data !== null && Object.keys(data).length > 0);
+}
+
 export default class ObjectInspector extends Component {
 
-  static isExpandable(data){
-    return (typeof data === 'object' && data !== null && Object.keys(data).length > 0);
+  constructor(...args) {
+    super(...args);
+    this.handleClick = this.handleClick.bind(this);
+    this.onChange = this.onChange.bind(this);
   }
-
+  
   shouldComponentUpdate(nextProps) {
     return (
       nextProps.data !== this.props.data ||
@@ -20,12 +28,12 @@ export default class ObjectInspector extends Component {
   }
 
   handleClick() {
-    if (ObjectInspector.isExpandable(this.props.data)) {
-      let oldValue = this.props.expandedTree || {};
+    if (isExpandable(this.props.data)) {
+      let oldValue = this.props.expandedTree;
       this.props.onChange({
         ...oldValue,
         expanded: !this.getExpanded()
-      });
+      }, this.props.name);
     }
   }
 
@@ -36,7 +44,7 @@ export default class ObjectInspector extends Component {
   }
 
   getExpanded() {
-    if (this.props.expandedTree && typeof this.props.expandedTree.expanded === 'boolean') {
+    if (typeof this.props.expandedTree.expanded === 'boolean') {
       return this.props.expandedTree.expanded;
     }
     if (this.props.expandedDepth >= this.props.depth) {
@@ -45,65 +53,75 @@ export default class ObjectInspector extends Component {
     return false;
   }
 
-  onChange(name, newValue) {
-    let oldValue = this.props.expandedTree || {};
+  onChange(newValue, name) {
+    let oldValue = this.props.expandedTree;
     this.props.onChange({
       ...oldValue,
       ['!' + name]: newValue
-    });
+    }, this.props.name);
+  }
+
+  _renderProperty(propertyName, propertyValue) {
+    if (!isExpandable(propertyValue)) {
+      return (
+        <BasicProperty
+          key={propertyName}
+          name={propertyName}
+          data={propertyValue}
+        />
+      );
+    }
+    return (
+      <ObjectInspector expandedTree={this.props.expandedTree['!' + propertyName]}
+        onChange={this.onChange}
+        expandedDepth={this.props.expandedDepth}
+        depth={this.props.depth + 1}
+        key={propertyName}
+        name={propertyName}
+        data={propertyValue}/>
+    );
   }
 
   render() {
     const data = this.props.data;
     const name = this.props.name;
 
-    const expanded = ObjectInspector.isExpandable(this.props.data) && this.getExpanded();
+    const expanded = isExpandable(data) && this.getExpanded();
 
-    const expandGlyph = ObjectInspector.isExpandable(data) ? (expanded ? '▼' : '▶') : (typeof name === 'undefined' ? '' : ' ');
+    const expandGlyph = isExpandable(data) ? (expanded ? '▼' : '▶') : (typeof name === 'undefined' ? '' : ' ');
 
     let propertyNodesContainer;
     if(expanded){
       let propertyNodes = [];
-      let onProperty = (propertyName) => {
-        const propertyValue = data[propertyName];
-        if(data.hasOwnProperty(propertyName)){
-          propertyNodes.push(<ObjectInspector expandedTree={this.props.expandedTree && this.props.expandedTree['!' + propertyName]}
-                                              onChange={newValue => this.onChange(propertyName, newValue)}
-                                              expandedDepth={this.props.expandedDepth}
-                                              depth={this.props.depth + 1}
-                                              key={propertyName}
-                                              name={propertyName}
-                                              data={propertyValue}></ObjectInspector>);
-        }
-      }
       if (Array.isArray(data)) {
         for (let i = 0; i < data.length; i++) {
-          onProperty('' + i);
+          propertyNodes.push(this._renderProperty('' + i, data[i]));
         }
       } else {
         for(let propertyName in data){
-          onProperty(propertyName);
+          if(data.hasOwnProperty(propertyName)){
+            propertyNodes.push(this._renderProperty(propertyName, data[propertyName]));
+          }
         }
       }
-      propertyNodesContainer = (<div style={{paddingLeft:"12px"}} className="ObjectInspector-property-nodes-container">{propertyNodes}</div>);
+      propertyNodesContainer = (<div className="ObjectInspector-property-nodes-container">{propertyNodes}</div>);
     }
 
     return (
       <div className="ObjectInspector">
-        <span className="ObjectInspector-property" onTouchStart={this.handleClick.bind(this)} onClick={this.handleClick.bind(this)}>
+        <span className="ObjectInspector-property" onTouchStart={this.handleClick} onClick={this.handleClick}>
           <span className="ObjectInspector-expand-control ObjectInspector-unselectable">{expandGlyph}</span>
-          {(() => {
-            if (typeof name !== 'undefined') {
-              return (<span>
-                        <span className="ObjectInspector-object-name">{name}</span>
-                        <span>: </span>
-                        <ObjectDescription object={data} overrideLength={this.props.overrideLength} />
-                      </span>);
-            }
-            else{
-              return (<ObjectPreview object={data}/>);
-            }
-          })()}
+          {
+            typeof name !== 'undefined'
+            ? (
+              <span>
+                <span className="ObjectInspector-object-name">{name}</span>
+                <span>: </span>
+                <ObjectDescription object={data} overrideLength={this.props.overrideLength} />
+              </span>
+            )
+            : <ObjectPreview object={data}/>
+          }
         </span>
         {propertyNodesContainer}
       </div>
@@ -116,14 +134,36 @@ ObjectInspector.propTypes = {
   name: PropTypes.string,
   data: PropTypes.any,
   depth: PropTypes.number,
-  objectinspectorid: PropTypes.string
+  expandedDepth: PropTypes.number,
+  expandedTree: PropTypes.object,
+  // if the top level entry is a named array, you can override the length used in the description here
+  overrideLength: PropTypes.number,
+  onChange: PropTypes.func.isRequired,
 };
 
 ObjectInspector.defaultProps = {
   name: undefined,
   data: undefined,
   depth: 0,
-  objectinspectorid: '',
-  expandedDepth: -1
+  expandedDepth: -1,
+  expandedTree: DEFAULT_EXPANDED_TREE
 };
 
+function BasicProperty(props) {
+  return (
+    <div className="ObjectInspector">
+      <span className="ObjectInspector-property">
+        <span className="ObjectInspector-expand-control ObjectInspector-unselectable"> </span>
+        <span>
+          <span className="ObjectInspector-object-name">{props.name}</span>
+          <span>: </span>
+          <ObjectDescription object={props.data} />
+        </span>
+      </span>
+    </div>
+  );
+}
+BasicProperty.propTypes = {
+  name: PropTypes.string,
+  data: PropTypes.any
+};

@@ -7,6 +7,7 @@ function intersperse(arr, sep){
     return [];
   }
 
+  // TODO: optimise this to a simple loop
   return arr.slice(1).reduce(function(xs, x, i) {
       return xs.concat([sep, x]);
   }, [arr[0]]);
@@ -22,6 +23,9 @@ export default class ObjectPreview extends Component {
       nextProps.maxProperties !== this.props.maxProperties
     );
   }
+  _renderArrayEntry(element, index){
+    return <ObjectDescription key={index} object={element} />;
+  }
   render() {
     const object = this.props.object;
     if (typeof object !== 'object' || object === null) {
@@ -30,9 +34,7 @@ export default class ObjectPreview extends Component {
 
     if (Array.isArray(object)) {
       return <span className="ObjectInspector-object-preview">[
-        {intersperse(object.map(function(element, index){
-          return (<ObjectDescription key={index} object={element} />)
-        }), ", ")}
+        {intersperse(object.map(this._renderArrayEntry), ", ")}
       ]</span>;
     }
     else if (object instanceof Date) {

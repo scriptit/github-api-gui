@@ -225,7 +225,7 @@ export default React.createClass({
   onSubmit(e) {
     e.preventDefault();
     var id = ++this._requestId;
-    this.setState({loading: true, result: null});
+    this.setState({loading: true, result: null, expandedTree: {}});
     var params = {};
     this.getParams().forEach(
       p => params[p.name] = this.state.paramValues[p.name]
@@ -381,7 +381,13 @@ export default React.createClass({
         name="Results"
         expandedDepth={1}
         expandedTree={this.state.expandedTree}
-        onChange={tree => this.setState({expandedTree: tree})}
+        onChange={tree => {
+          if (tree.expanded === false && Array.isArray(this.state.result)) {
+            this.setState({expandedTree: tree, result: this.state.result.slice(0, 10)});
+          } else {
+            this.setState({expandedTree: tree});
+          }
+        }}
       />
     );
     if (!Array.isArray(this.state.result)) return inspector;
@@ -407,7 +413,13 @@ export default React.createClass({
         threshold={500}
         pageStart={this.state.result.length}
         loadMore={this.nextPage}
-        hasMore={this.state.fullResult.length > this.state.result.length || this.state.fullResult.getNext}
+        hasMore={
+          (
+            this.state.expandedTree.expanded !== false &&
+            this.state.fullResult.length > this.state.result.length
+          ) ||
+          this.state.fullResult.getNext
+        }
         loader={loadingIndicator}
       >{inspector}</InfiniteScroll>
     );
@@ -415,7 +427,7 @@ export default React.createClass({
   nextPage() {
     if (this._nextPageRequested) return;
     this._nextPageRequested = true;
-    if (this.state.result.length < this.state.fullResult.length) {
+    if (this.state.result.length < this.state.fullResult.length && this.state.expandedTree.expanded !== false) {
       var count = this.state.result.length + 10;
       if (count > this.state.fullResult.length) {
         count = this.state.fullResult.length;
@@ -428,7 +440,9 @@ export default React.createClass({
         if (id !== this._requestId) return;
         var fullResult = this.state.fullResult.concat(nextPage);
         fullResult.getNext = nextPage.getNext;
-        var count = this.state.result.length + 10;
+        var count = this.state.expandedTree.expanded !== false
+          ? this.state.result.length + 10
+          : 10;
         if (count > fullResult.length) {
           count = fullResult.length;
         }
@@ -441,6 +455,8 @@ export default React.createClass({
         if (id !== this._requestId) return;
         this.setState({error: err.message});
       });
+    } else {
+      this._nextPageRequested = false;
     }
   }
 });
