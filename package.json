@@ -1,6 +1,6 @@
 {
   "name": "github-api-gui",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A graphical interface for the GitHub API",
   "keywords": [],
   "dependencies": {
@@ -40,5 +40,5 @@
     "stop": "^3.0.1",
     "versionify": "^1.0.1"
   },
-  "versionify": "0.0.0"
+  "versionify": "0.0.1"
 }
