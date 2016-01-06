@@ -40,17 +40,5 @@
     "url": "https://github.com/scriptit/github-api-gui.git"
   },
   "author": "ForbesLindesay",
-<<<<<<< HEAD
   "license": "MIT"
 }
-=======
-  "license": "MIT",
-  "devDependencies": {
-    "mandate": "^1.0.1",
-    "rimraf": "^2.4.3",
-    "stop": "^3.0.1",
-    "versionify": "^1.0.1"
-  },
-  "versionify": "0.0.1"
-}
->>>>>>> origin/master
