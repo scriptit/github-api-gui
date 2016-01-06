@@ -4,6 +4,7 @@ process.env.NODE_ENV = 'production';
 
 var url = require('url');
 var stop = require('stop');
+var s3 = require('s3');
 
 var server = require('./server.js');
 
@@ -25,6 +26,26 @@ stop.getWebsiteStream('http://localhost:3000', {
 .syphon(stop.writeFileSystem(__dirname + '/out'))
 .wait().done(function () {
   server.close();
-
-  console.log('success');
+  console.log('done building website');
+  var client = s3.createClient({
+    s3Options: {
+      accessKeyId: process.env.S3_KEY,
+      secretAccessKey: process.env.S3_SECRET,
+      region: process.env.S3_REGION
+    },
+  });
+  var uploader = client.uploadDir({
+    localDir: __dirname + '/out',
+    deleteRemoved: false,
+    s3Params: {
+      Bucket: process.env.S3_BUCKET,
+      Prefix: ''
+    }
+  });
+  uploader.on('error', function(err) {
+    console.error('unable to sync:', err.stack);
+  });
+  uploader.on('end', function() {
+    console.log("done uploading website");
+  });
 });

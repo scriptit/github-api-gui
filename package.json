@@ -1,12 +1,14 @@
 {
   "name": "github-api-gui",
   "version": "0.0.0",
+  "private": true,
   "description": "A graphical interface for the GitHub API",
   "keywords": [],
   "dependencies": {
     "babelify": "^6.4.0",
     "base64-js": "0.0.8",
     "browserify-middleware": "^7.0.0",
+    "envify": "^3.4.0",
     "express": "^4.13.3",
     "github-basic": "^5.0.0",
     "github-stream": "^1.0.1",
@@ -21,24 +23,22 @@
     "react-infinite-scroll": "^0.1.5",
     "stop": "^3.0.1",
     "text-encoder-lite": "^1.0.0",
-    "then-request": "^2.1.1"
+    "then-request": "^2.1.1",
+    "uglifyify": "^3.0.1"
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.0",
+    "s3": "^4.4.0",
+    "stop": "^3.0.1"
   },
   "scripts": {
-    "prerelease": "versionify && rimraf out",
-    "release": "node stop && mandate",
-    "postrelease": "rimraf out"
+    "test": "echo No Tests",
+    "deploy": "rimraf out && node deploy && rimraf out"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ForbesLindesay/github-api-gui.git"
+    "url": "https://github.com/scriptit/github-api-gui.git"
   },
   "author": "ForbesLindesay",
-  "license": "MIT",
-  "devDependencies": {
-    "mandate": "^1.0.1",
-    "rimraf": "^2.4.3",
-    "stop": "^3.0.1",
-    "versionify": "^1.0.1"
-  },
-  "versionify": "0.0.0"
+  "license": "MIT"
 }
