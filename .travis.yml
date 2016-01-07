@@ -7,4 +7,4 @@ sudo: false
 
 script:
   - npm test
-  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && npm run deploy
+  - npm run deploy

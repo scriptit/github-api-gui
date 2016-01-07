@@ -27,6 +27,13 @@ stop.getWebsiteStream('http://localhost:3000', {
 .wait().done(function () {
   server.close();
   console.log('done building website');
+  if (!(
+    process.env.TRAVIS_PULL_REQUEST === 'false' &&
+    process.env.TRAVIS_BRANCH === 'master'
+  )) {
+    console.log('not deploying as not master branch in travis');
+    return;
+  }
   var client = s3.createClient({
     s3Options: {
       accessKeyId: process.env.S3_KEY,
