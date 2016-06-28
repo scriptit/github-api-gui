@@ -5,7 +5,7 @@
   "description": "A graphical interface for the GitHub API",
   "keywords": [],
   "dependencies": {
-    "babelify": "^6.4.0",
+    "babelify": "^7.3.0",
     "browserify-middleware": "^7.0.0",
     "envify": "^3.4.0",
     "express": "^4.13.3",
