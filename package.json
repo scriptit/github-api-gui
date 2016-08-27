@@ -28,7 +28,7 @@
   "devDependencies": {
     "rimraf": "^2.5.0",
     "s3": "^4.4.0",
-    "stop": "^3.0.1",
+    "stop": "^3.1.0",
     "testit": "^2.0.2"
   },
   "scripts": {
