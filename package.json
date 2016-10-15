@@ -23,7 +23,7 @@
     "stop": "^3.0.1",
     "text-encoder-lite": "^1.0.0",
     "then-request": "^2.1.1",
-    "uglifyify": "^3.0.1"
+    "uglifyify": "^3.0.4"
   },
   "devDependencies": {
     "rimraf": "^2.5.0",
