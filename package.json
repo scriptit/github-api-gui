@@ -17,7 +17,7 @@
     "markdown-it": "^7.0.0",
     "parse-links": "^0.1.0",
     "rc-switch": "^1.2.1",
-    "react": "^0.14.6",
+    "react": "^15.5.0",
     "react-dom": "^0.14.6",
     "react-infinite-scroll": "^0.1.5",
     "stop": "^3.0.1",
